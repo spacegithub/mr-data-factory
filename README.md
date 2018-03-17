@@ -1,19 +1,21 @@
-# mr-data-factory
-ZT 抓据抓取与结构化
+# mr-data-factory  
+ZT 数据抓取与结构化  
 
-## 项目安装
-该项目是springboot工程，使用到了lombok插件， 需要安装该插件。
-如果eclipse，下载 lombok（https://projectlombok.org/downloads/lombok.jar），直接双击安装即可。
-如果是IDE，编译器会提示安装，非常简单。
-lombok安装完成后，导入mr-data-factory，编译通过即可。
+## 项目安装  
+该项目是springboot工程，使用到了lombok插件， 需要安装该插件。  
+如果eclipse，下载 lombok（/**https://projectlombok.org/downloads/lombok.jar**/）  
+直接双击安装即可。  
+如果是IDE，编译器会提示安装，非常简单。    
+lombok安装完成后，导入mr-data-factory，编译通过即可。  
 
 ## 运行demo
 任务demo类：com.mr.modules.api.site.instance.DemoSiteTask  
-里面的任务逻辑：  
-    log.info("*******************call site task**************");  
-		Thread.sleep(30 * 1000);  
-		return null;  
-
+里面的任务逻辑： 
+```
+log.info("*******************call site task**************");  
+Thread.sleep(30 * 1000);  
+return null;  
+```
 运行com.mr.RootApplication，等待启动完成后开始测试。  
 1、启动一个任务，发送http请求：http://localhost:8082/api/start/demo/1 ，  
 如果返回为：  
@@ -29,9 +31,9 @@ lombok安装完成后，导入mr-data-factory，编译通过即可。
 }  
 表示运行完成   
 如果返回为：  
-{
+{  
     "finish": false  
-}
+}  
 表示运行未完成  
 
 3、查询返回结果,发送http请求：http://localhost:8082/api/result_code/1  
@@ -48,7 +50,7 @@ lombok安装完成后，导入mr-data-factory，编译通过即可。
 如果返回为：  
 {  
     "result_code": "failure"  
-}
+}  
 表示运行失败  
 
 4、查询错误信息,发送http请求：http://localhost:8082/api/throwable_info/1  
@@ -59,7 +61,7 @@ lombok安装完成后，导入mr-data-factory，编译通过即可。
 
 5、删除任务,发送http请求：http://localhost:8082/api/del/1  
 如果返回为：  
-{
+{  
     "del_result": true  
 }  
 表示删除成功  
@@ -82,7 +84,7 @@ callId：任务调用ID， 必须全局唯一，由客户端控制
 
 ## 任务开发：
 1、继承com.mr.modules.api.site.SiteTask，实现execute()方法。  
-任务执行返回值：""或者null为成功， 其它为失败  
+任务执行返回值：""或者null为成功， 其它为失败。  
 参考：com.mr.modules.api.site.instance.DemoSiteTask  
 2、com.mr.modules.api.SiteTaskDict中注册任务，   
 例如：DEMO("demo", "com.mr.modules.api.site.instance.DemoSiteTask")  
@@ -93,9 +95,9 @@ callId：任务调用ID， 必须全局唯一，由客户端控制
 2、解析网页逻辑  
 3、持久化  
 
-## 任务开发注意
-1、任务开发过程中用到功能尽量使用spring集成的工具  
+## 任务开发注意  
+1、任务开发过程中用到功能尽量使用spring集成的工具。    
 如：http访问类请使用 RestTemplate 来操作，可以通过SpringUtils.getBean("restTemplate")来获取。  
 2、任务开发涉及到的三部分尽量独立，至少分开三个方法，便于后期维护。  
 3、任务开发过程中只写抓取解析保存逻辑，不要考虑调度安全等问题，这些功能其它部分来考虑。  
-4、错误没有特殊需要直接抛出来，由框架统一处理。  
+4、错误没有特殊需要直接抛出来，由框架统一处理。   
