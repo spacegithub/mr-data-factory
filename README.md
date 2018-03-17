@@ -3,7 +3,7 @@ ZT 数据抓取与结构化
 
 ## 项目安装  
 该项目是springboot工程，使用到了lombok插件， 需要安装该插件。  
-如果eclipse，下载 lombok（/**https://projectlombok.org/downloads/lombok.jar**/）  
+如果eclipse，下载 lombok（https://projectlombok.org/downloads/lombok.jar)    
 直接双击安装即可。  
 如果是IDE，编译器会提示安装，非常简单。    
 lombok安装完成后，导入mr-data-factory，编译通过即可。  
