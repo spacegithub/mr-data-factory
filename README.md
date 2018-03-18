@@ -86,8 +86,10 @@ callId：任务调用ID， 必须全局唯一，由客户端控制
 1、继承com.mr.modules.api.site.SiteTask，实现execute()方法。  
 任务执行返回值：""或者null为成功， 其它为失败。  
 参考：com.mr.modules.api.site.instance.DemoSiteTask  
-2、com.mr.modules.api.SiteTaskDict中注册任务，   
-例如：DEMO("demo", "com.mr.modules.api.site.instance.DemoSiteTask")  
+2、在开发好的SiteTask实现类上添加注解：  
+@Component("{name}"),  
+@Scope("prototype")  
+说明：{name}为task任务名,等于前文开启接口/api/start/{indexId}/{callId} 中的{indexId}  
 3、测试任务，参考前文描述《运行demo》。  
 
 ## 任务开发内容  
