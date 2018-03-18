@@ -2,6 +2,7 @@ package com.mr.modules.api.site.instance;
 
 import com.mr.modules.api.site.SiteTaskExtend;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Component;
  */
 
 @Slf4j
-@Component
+@Component("site3")
+@Scope("prototype")
 public class SiteTaskImpl_3 extends SiteTaskExtend {
 
 	/**

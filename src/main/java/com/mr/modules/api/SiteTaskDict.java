@@ -2,7 +2,9 @@ package com.mr.modules.api;
 
 /**
  * Created by feng on 18-3-16
+ * SpringBoot环境下使用注解方式实例化Task类,不需要反射实例化,暂时不用到此类
  */
+@Deprecated
 public enum SiteTaskDict {
 	DEMO("demo", "com.mr.modules.api.site.instance.DemoSiteTask"),
 	SITE1("site1", "com.mr.modules.api.site.instance.SiteTaskImpl_1"),

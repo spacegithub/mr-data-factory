@@ -4,6 +4,7 @@ import com.mr.common.OCRUtil;
 import com.mr.common.util.SpringUtils;
 import com.mr.modules.api.site.SiteTaskExtend;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Component;
  */
 
 @Slf4j
-@Component
+@Component("site9")
+@Scope("prototype")
 public class SiteTaskImpl_9 extends SiteTaskExtend {
 
 	protected OCRUtil ocrUtil = SpringUtils.getBean(OCRUtil.class);

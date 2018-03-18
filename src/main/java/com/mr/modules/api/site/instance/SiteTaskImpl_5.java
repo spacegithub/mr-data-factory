@@ -2,6 +2,7 @@ package com.mr.modules.api.site.instance;
 
 import com.mr.modules.api.site.SiteTaskExtend;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -10,11 +11,12 @@ import java.util.Map;
 /**
  * Created by feng on 18-3-16
  * 上交所
- * 债券监管
+ *
  */
 
 @Slf4j
-@Component
+@Component("site5")
+@Scope("prototype")
 public class SiteTaskImpl_5 extends SiteTaskExtend {
 
 	/**

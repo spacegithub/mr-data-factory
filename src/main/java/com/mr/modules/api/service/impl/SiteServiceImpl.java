@@ -1,12 +1,12 @@
 package com.mr.modules.api.service.impl;
 
 import com.mr.common.util.EhCacheUtils;
-import com.mr.modules.api.SiteTaskDict;
+import com.mr.common.util.SpringUtils;
 import com.mr.modules.api.TaskStatus;
 import com.mr.modules.api.service.SiteService;
+import com.mr.modules.api.site.ResourceGroup;
 import com.mr.modules.api.site.SiteTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -16,9 +16,8 @@ import java.util.Objects;
  */
 
 @Service
+@Slf4j
 public class SiteServiceImpl implements SiteService {
-
-	private static final Logger log = LoggerFactory.getLogger(SiteServiceImpl.class);
 
 	/**
 	 * @param groupIndex SiteTask enum index 信息
@@ -27,16 +26,17 @@ public class SiteServiceImpl implements SiteService {
 	 */
 	@Override
 	public String start(String groupIndex, String callId) throws Exception {
-		SiteTask task = null;
+		ResourceGroup task = null;
 
+		log.info(String.valueOf(task));
 		if (!Objects.isNull(getTask(callId))) {
-			log.error("task exists...");
+			log.warn("task exists...");
 			return "task exists...";
 		}
 
 		try {
-			task = (SiteTask) Class.forName(SiteTaskDict.getName(groupIndex)).newInstance();
-		} catch (ClassNotFoundException e) {
+			task = (ResourceGroup)SpringUtils.getBean(groupIndex);
+		} catch (Exception e) {
 			log.error(e.getMessage());
 			return "SiteTask object instance not found";
 		}
@@ -46,9 +46,9 @@ public class SiteServiceImpl implements SiteService {
 	}
 
 	public Boolean isFinish(String callId) throws Exception {
-		SiteTask task = getTask(callId);
+		ResourceGroup task = getTask(callId);
 		if (Objects.isNull(getTask(callId))) {
-			log.error("task not exists...");
+			log.warn("task not exists...");
 			return false;
 		}
 
@@ -63,7 +63,7 @@ public class SiteServiceImpl implements SiteService {
 	@Override
 	public String getResultCode(String callId) throws Exception {
 		if (Objects.isNull(getTask(callId))) {
-			log.error("task not exists...");
+			log.warn("task not exists...");
 			return "task not exists...";
 		}
 
@@ -76,7 +76,7 @@ public class SiteServiceImpl implements SiteService {
 	@Override
 	public String getThrowableInfo(String callId) throws Exception {
 		if (Objects.isNull(getTask(callId))) {
-			log.error("task not exists...");
+			log.warn("task not exists...");
 			return "task not exists...";
 		}
 
@@ -90,7 +90,7 @@ public class SiteServiceImpl implements SiteService {
 	public Boolean delSiteTaskInstance(String callId) throws Exception {
 		try {
 			if (Objects.isNull(getTask(callId))) {
-				log.error("task not exists...");
+				log.warn("task not exists...");
 				return false;
 			}
 			SiteTask.delSiteTaskInstance(callId);
@@ -101,8 +101,8 @@ public class SiteServiceImpl implements SiteService {
 		return true;
 	}
 
-	private SiteTask getTask(String callId) throws Exception {
-		return ((SiteTask) EhCacheUtils.get(callId));
+	private ResourceGroup getTask(String callId) throws Exception {
+		return ((ResourceGroup) EhCacheUtils.get(callId));
 	}
 
 }

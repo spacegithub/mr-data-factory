@@ -2,6 +2,7 @@ package com.mr.modules.api.site.instance;
 
 import com.mr.modules.api.site.SiteTaskExtend;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -14,7 +15,8 @@ import java.util.Map;
  */
 
 @Slf4j
-@Component
+@Component("site4")
+@Scope("prototype")
 public class SiteTaskImpl_4 extends SiteTaskExtend {
 
 	/**
