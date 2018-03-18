@@ -3,18 +3,71 @@ package com.mr.common;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.jdesktop.swingx.util.OS;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import com.xiaoleilu.hutool.io.FileUtil;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Component
 public class OCRUtil {
 
-	private final static String DOWNLOAD_DIR = "/home/fengjiang/Documents";
+	@Value("${download-dir}")
+	private String downloadDir;
+
+	public static String DOWNLOAD_DIR = System.getProperty("java.io.tmpdir");
+
+	@PostConstruct
+	public void postConfig(){
+		DOWNLOAD_DIR = downloadDir;
+	}
+
+	/**
+	 * 从img识别文本内容并返回，包含pdf扫描图片识别
+	 * @param fileName
+	 * @return
+	 * @throws Exception
+	 */
+	public String getTextFromImg(String fileName) throws Exception {
+		return recognizeTexts(image2Dir(fileName));
+	}
+
+	/**
+	 *
+	 * @Title: getTextFromPdf
+	 * @Description: 读取pdf文件内容
+	 * @param filePath
+	 * @return: 读出的pdf的内容
+	 */
+	public String getTextFromPdf(String filePath) throws Exception {
+		String textFile = readPdf(filePath);
+		String res = FileUtil.readString(textFile,  "utf-8");
+		FileUtil.del(textFile);
+		FileUtil.del(DOWNLOAD_DIR + File.separator + filePath);
+		return res;
+	}
+
+	/**
+	 *
+	 * @Title: getTextFromDoc
+	 * @Description: 读取doc文本内容
+	 * @param filePath
+	 * @return: 读出的doc的内容
+	 */
+	public String getTextFromDoc(String filePath) throws Exception {
+		// TODO
+		return null;
+	}
+
+
 
 	/**
 	 * 解析的dirName下的所有图片
@@ -24,7 +77,7 @@ public class OCRUtil {
 	 *
 	 * @param dirName
 	 */
-	public static String recognizeTexts(String dirName) throws Exception {
+	public String recognizeTexts(String dirName) throws Exception {
 		File testDataDir = new File(dirName);
 		//listFiles()方法是返回某个目录下所有文件和目录的绝对路径，返回的是File数组
 		File[] files = testDataDir.listFiles();
@@ -36,6 +89,8 @@ public class OCRUtil {
 		for(int i=imgCount - 1; i >= 0; i--){
 			sbs.append(recognizeText(files[i]));
 		}
+		//删除文件夹 dirName
+		FileUtil.del(dirName);
 		return sbs.toString();
 	}
 
@@ -52,7 +107,7 @@ public class OCRUtil {
 	 *
 	 * @param image 输入一张图片（这里放在了项目目录）
 	 */
-	public static String recognizeText(File image) throws Exception {
+	public String recognizeText(File image) throws Exception {
 
 		File outputfile = new File(image.getParentFile(), "output");//输出文件的保存目录
 
@@ -119,7 +174,7 @@ public class OCRUtil {
 	 *                 将文件移到文件夹内，并改名.
 	 * @return
 	 */
-	public static String image2Dir(String fileName) {
+	public String image2Dir(String fileName) {
 		String entirePathName = DOWNLOAD_DIR + File.separator + fileName;
 		String dirs[] = fileName.split("\\.");
 		File dirFile = new File(DOWNLOAD_DIR + File.separator + dirs[0]);
@@ -140,7 +195,7 @@ public class OCRUtil {
 	 *
 	 * @param pdfName
 	 */
-	public static void pdf2image(String pdfName) {
+	public void pdf2image(String pdfName) {
 		File file = new File(pdfName);
 		try {
 			PDDocument doc = PDDocument.load(file);
@@ -166,18 +221,82 @@ public class OCRUtil {
 	 * @param src
 	 * @param to
 	 */
-	public static void renameTo(String src, String to) {
+	public void renameTo(String src, String to) {
 		File file = new File(src);   //指定文件名及路径
 		file.renameTo(new File(to));   //改名
 	}
 
+
+	/**
+	 *
+	 * @param file 原文件名字
+	 * @return	生成的文本文件名字
+	 * @throws  Exception
+	 */
+	public String readPdf(String file) throws Exception {
+		// 是否排序
+		boolean sort = false;
+		String tFile = DOWNLOAD_DIR + File.separator + file;
+		// pdf文件名
+		File pdfFile = new File(tFile);
+		// 输入文本文件名称
+		String textFile = null;
+		// 编码方式
+		String encoding = "UTF-8";
+		// 开始提取页数
+		int startPage = 1;
+		// 结束提取页数
+		int endPage = Integer.MAX_VALUE;
+		// 文件输入流，生成文本文件
+		Writer output = null;
+		// 内存中存储的PDF Document
+		PDDocument document = null;
+		try {
+			document = PDDocument.load(pdfFile);
+			if (pdfFile.length() > 4) {
+				textFile = tFile.substring(0, tFile.length() - 4)
+						+ ".txt";
+			}
+			// 文件输入流，写入文件倒textFile
+			output = new OutputStreamWriter(new FileOutputStream(textFile),
+					encoding);
+			// PDFTextStripper来提取文本
+			PDFTextStripper stripper = null;
+			stripper = new PDFTextStripper();
+			// 设置是否排序
+			stripper.setSortByPosition(sort);
+			// 设置起始页
+			stripper.setStartPage(startPage);
+			// 设置结束页
+			stripper.setEndPage(endPage);
+			// 调用PDFTextStripper的writeText提取并输出文本
+			stripper.writeText(document, output);
+		} finally {
+			if (output != null) {
+				// 关闭输出流
+				output.close();
+			}
+			if (document != null) {
+				// 关闭PDF Document
+				document.close();
+			}
+		}
+		return textFile;
+	}
+
 	public static void main(String[] args) {
 		try {
-//			renameTo("/home/fengjiang/Documents/nginx.conf", "/home/fengjiang/Documents/projdoc/nginx.conf");
-//			pdf2image(DOWNLOAD_DIR + File.separator + "P020171222593212170499.pdf");
-//			image2Dir("P020171222593212170499.pdf");
-			log.info(recognizeTexts(image2Dir("P020171222593212170499.pdf")));
-//			image2Dir("434324.png");
+			OCRUtil ocrUtil = new OCRUtil();
+			ocrUtil.DOWNLOAD_DIR = "/home/fengjiang/Documents";
+//			ocrUtil.renameTo("/home/fengjiang/Documents/nginx.conf", "/home/fengjiang/Documents/projdoc/nginx.conf");
+//			ocrUtil.pdf2image(DOWNLOAD_DIR + File.separator + "P020171222593212170499.pdf");
+//			ocrUtil.image2Dir("P020171222593212170499.pdf");
+			//ocrUtil.image2Dir("434324.png");
+
+//			log.info(ocrUtil.recognizeTexts(ocrUtil.image2Dir("P020171222593212170499.pdf")));
+
+			log.info(ocrUtil.getTextFromPdf("P020180302563551437859.pdf"));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

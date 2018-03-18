@@ -28,16 +28,17 @@ public class SiteServiceImpl implements SiteService {
 	@Override
 	public String start(String groupIndex, String callId) throws Exception {
 		SiteTask task = null;
+
+		if (!Objects.isNull(getTask(callId))) {
+			log.error("task exists...");
+			return "task exists...";
+		}
+
 		try {
 			task = (SiteTask) Class.forName(SiteTaskDict.getName(groupIndex)).newInstance();
 		} catch (ClassNotFoundException e) {
 			log.error(e.getMessage());
 			return "SiteTask object instance not found";
-		}
-
-		if (!Objects.isNull(getTask(callId))) {
-			log.error("task exists...");
-			return "task exists...";
 		}
 
 		EhCacheUtils.put(callId, task);

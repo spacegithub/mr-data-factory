@@ -4,7 +4,17 @@ package com.mr.modules.api;
  * Created by feng on 18-3-16
  */
 public enum SiteTaskDict {
-	DEMO("demo", "com.mr.modules.api.site.instance.DemoSiteTask");
+	DEMO("demo", "com.mr.modules.api.site.instance.DemoSiteTask"),
+	SITE1("site1", "com.mr.modules.api.site.instance.SiteTaskImpl_1"),
+	SITE2("site2", "com.mr.modules.api.site.instance.SiteTaskImpl_2"),
+	SITE3("site3", "com.mr.modules.api.site.instance.SiteTaskImpl_3"),
+	SITE4("site4", "com.mr.modules.api.site.instance.SiteTaskImpl_4"),
+	SITE5("site5", "com.mr.modules.api.site.instance.SiteTaskImpl_5"),
+	SITE6("site6", "com.mr.modules.api.site.instance.SiteTaskImpl_6"),
+	SITE7("site7", "com.mr.modules.api.site.instance.SiteTaskImpl_7"),
+	SITE8("site8", "com.mr.modules.api.site.instance.SiteTaskImpl_8"),
+	SITE9("site9", "com.mr.modules.api.site.instance.SiteTaskImpl_9"),
+	SITE10("site10", "com.mr.modules.api.site.instance.SiteTaskImpl_10");
 
 	// 成员变量
 

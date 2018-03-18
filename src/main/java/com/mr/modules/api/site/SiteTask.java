@@ -6,6 +6,7 @@ import com.mr.modules.api.TaskStatus;
 import com.mr.modules.api.caller.SiteVisitor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -14,6 +15,7 @@ import java.util.concurrent.*;
  * Created by feng on 18-3-16
  */
 @Slf4j
+@Component
 public abstract class SiteTask implements ResourceGroup, Callable<String> {
 
 	private Integer returnCode;
