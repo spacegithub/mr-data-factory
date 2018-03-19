@@ -126,6 +126,7 @@ public class SiteTaskImpl_2 extends SiteTaskExtend {
 					detailIsOn = false;
 					detail = details.toString().replace("[","").replace("]", "");
 				}
+
 			}
 
 		}
