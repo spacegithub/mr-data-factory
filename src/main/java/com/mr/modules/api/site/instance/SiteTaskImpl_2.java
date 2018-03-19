@@ -45,6 +45,7 @@ public class SiteTaskImpl_2 extends SiteTaskExtend {
 	 * 序号、处罚文号、处罚对象、处罚日期、发布机构、发布日期、名单分类、标题名称、详情
 	 */
 	private void extract(String fullTxt) {
+		ArrayList<String> filterTags = Lists.newArrayList("<SPAN>", "</SPAN>", "&nbsp;", "　");
 		//序号 TODO 需确认
 		String seqNo = "";
 		seqNo = "";
@@ -55,7 +56,7 @@ public class SiteTaskImpl_2 extends SiteTaskExtend {
 		//处罚对象
 		String punishObject = "";
 		ArrayList<String> punishObjects = Lists.newArrayList();
-		ArrayList<String> filterTags = Lists.newArrayList("<SPAN>", "</SPAN>", "&nbsp;", "　");
+
 		boolean isOn = false;
 
 		//处罚日期
@@ -125,8 +126,6 @@ public class SiteTaskImpl_2 extends SiteTaskExtend {
 					detailIsOn = false;
 					detail = details.toString().replace("[","").replace("]", "");
 				}
-
-
 			}
 
 		}
