@@ -103,7 +103,7 @@ public abstract class SiteTaskExtend extends SiteTask {
 		String reg = "[^\u4e00-\u9fa5]";
 		str = str.replaceAll(reg, "");
 
-		return s;
+		return str;
 	}
 
 	/**
