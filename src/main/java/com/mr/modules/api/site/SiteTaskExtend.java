@@ -2,8 +2,8 @@ package com.mr.modules.api.site;
 
 import com.mr.common.OCRUtil;
 import com.mr.common.util.SpringUtils;
+import com.xiaoleilu.hutool.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -14,12 +14,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by feng on 18-3-16
@@ -28,6 +25,8 @@ import java.util.Map;
 @Slf4j
 @Component
 public abstract class SiteTaskExtend extends SiteTask {
+
+	private static String XLS_EXPORT_PATH = OCRUtil.DOWNLOAD_DIR + File.separator + "export";
 
 	protected RestTemplate restTemplate = SpringUtils.getBean(RestTemplate.class);
 
@@ -40,16 +39,46 @@ public abstract class SiteTaskExtend extends SiteTask {
 		return restTemplate.getForObject(url, String.class);
 	}
 
-	/**
-	 * POST 请求
-	 * @param url
-	 * @param requestParams
-	 * @return
-	 */
-	protected String postData(String url, Map<String, String> requestParams){
+	protected String getData(String url, Map<String, String> requestParams){
+		return restTemplate.getForObject(url + showParams(requestParams), String.class);
+	}
+
+	protected String getData(String url, Map<String, String> requestParams, Map<String, String> headParams){
+		HttpHeaders requestHeaders = new HttpHeaders();
+		if(headParams.size() >0){
+			for(Map.Entry<String, String> entry : headParams.entrySet()){
+				requestHeaders.add(entry.getKey(), entry.getValue());
+			}
+		}
+		HttpEntity<String> requestEntity = new HttpEntity<String>(null, requestHeaders);
+		ResponseEntity<String> response = restTemplate.exchange(url + showParams(requestParams), HttpMethod.GET, requestEntity, String.class);
+		return response.getBody();
+	}
+	private String showParams(Map<String, String> requestParams){
+		if (requestParams == null || requestParams.size() == 0) return "";
+
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry entry : requestParams.entrySet()) {
+
+			if (!sb.toString().equals("")) {
+				sb.append("&");
+			}
+			sb.append(entry.getKey() + "=" + entry.getValue());
+		}
+
+		return "?" + sb;
+	}
+
+	protected String postData(String url, Map<String, String> requestParams, Map<String, String> headParams){
 		HttpHeaders headers = new HttpHeaders();
 		//  请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		if(headParams.size() >0){
+			for(Map.Entry<String, String> entry : headParams.entrySet()){
+				headers.add(entry.getKey(), entry.getValue());
+			}
+		}
+
 		//  封装参数，千万不要替换为Map与HashMap，否则参数无法传递
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		//  也支持中文
@@ -59,6 +88,16 @@ public abstract class SiteTaskExtend extends SiteTask {
 		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 		//	输出结果
 		return response.getBody();
+	}
+
+	/**
+	 * POST 请求
+	 * @param url
+	 * @param requestParams
+	 * @return
+	 */
+	protected String postData(String url, Map<String, String> requestParams){
+		return postData(url, requestParams, null);
 	}
 	/**
 	 *
@@ -135,5 +174,18 @@ public abstract class SiteTaskExtend extends SiteTask {
 			to = to.replace(key, "");
 		}
 		return to;
+	}
+
+
+	/**
+	 * 导出为Excel
+	 */
+	protected int exportToXls(String xlsName, List<LinkedHashMap<String, String>> siteObjects){
+		FileUtil.mkdir(XLS_EXPORT_PATH);
+		return 0;
+	}
+
+	public void exportXls() throws IOException {
+
 	}
 }
