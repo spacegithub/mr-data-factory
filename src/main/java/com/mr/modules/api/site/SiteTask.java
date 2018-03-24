@@ -5,8 +5,8 @@ import com.mr.common.util.SpringUtils;
 import com.mr.modules.api.TaskStatus;
 import com.mr.modules.api.caller.SiteVisitor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -104,6 +104,8 @@ public abstract class SiteTask implements ResourceGroup, Callable<String> {
 		} catch (Throwable e) {
 			returnCode = TaskStatus.CALL_FAIL.index;
 			throwableInfo = e.getMessage();
+			e.printStackTrace();
+			log.error(throwableInfo);
 		}
 		return "";
 	}

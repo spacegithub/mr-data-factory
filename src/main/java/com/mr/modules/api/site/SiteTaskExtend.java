@@ -1,7 +1,19 @@
 package com.mr.modules.api.site;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mr.common.OCRUtil;
 import com.mr.common.util.SpringUtils;
+import com.mr.modules.api.xls.export.FileExportor;
+import com.mr.modules.api.xls.export.domain.common.ExportCell;
+import com.mr.modules.api.xls.export.domain.common.ExportConfig;
+import com.mr.modules.api.xls.export.domain.common.ExportResult;
+import com.mr.modules.api.xls.export.exception.FileExportException;
+import com.mr.modules.api.xls.importfile.FileImportExecutor;
+import com.mr.modules.api.xls.importfile.domain.MapResult;
+import com.mr.modules.api.xls.importfile.domain.common.Configuration;
+import com.mr.modules.api.xls.importfile.domain.common.ImportCell;
+import com.mr.modules.api.xls.importfile.exception.FileImportException;
 import com.xiaoleilu.hutool.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -10,12 +22,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -32,21 +42,31 @@ public abstract class SiteTaskExtend extends SiteTask {
 
 	/**
 	 * GET 请求
+	 *
 	 * @param url
 	 * @return
 	 */
-	protected String getData(String url){
+	protected String getData(String url) {
 		return restTemplate.getForObject(url, String.class);
 	}
 
-	protected String getData(String url, Map<String, String> requestParams){
+	protected String getData(String url, String charSet) {
+		return new String(restTemplate.getForObject(url, byte[].class), Charset.forName(charSet.toUpperCase()));
+
+	}
+
+	protected String getData(String url, Charset charSet) {
+		return new String(restTemplate.getForObject(url, byte[].class), charSet);
+	}
+
+	protected String getData(String url, Map<String, String> requestParams) {
 		return restTemplate.getForObject(url + showParams(requestParams), String.class);
 	}
 
-	protected String getData(String url, Map<String, String> requestParams, Map<String, String> headParams){
+	protected String getData(String url, Map<String, String> requestParams, Map<String, String> headParams) {
 		HttpHeaders requestHeaders = new HttpHeaders();
-		if(headParams.size() >0){
-			for(Map.Entry<String, String> entry : headParams.entrySet()){
+		if (headParams.size() > 0) {
+			for (Map.Entry<String, String> entry : headParams.entrySet()) {
 				requestHeaders.add(entry.getKey(), entry.getValue());
 			}
 		}
@@ -54,7 +74,8 @@ public abstract class SiteTaskExtend extends SiteTask {
 		ResponseEntity<String> response = restTemplate.exchange(url + showParams(requestParams), HttpMethod.GET, requestEntity, String.class);
 		return response.getBody();
 	}
-	private String showParams(Map<String, String> requestParams){
+
+	private String showParams(Map<String, String> requestParams) {
 		if (requestParams == null || requestParams.size() == 0) return "";
 
 		StringBuilder sb = new StringBuilder();
@@ -69,12 +90,12 @@ public abstract class SiteTaskExtend extends SiteTask {
 		return "?" + sb;
 	}
 
-	protected String postData(String url, Map<String, String> requestParams, Map<String, String> headParams){
+	protected String postData(String url, Map<String, String> requestParams, Map<String, String> headParams) {
 		HttpHeaders headers = new HttpHeaders();
 		//  请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		if(headParams.size() >0){
-			for(Map.Entry<String, String> entry : headParams.entrySet()){
+		if (headParams.size() > 0) {
+			for (Map.Entry<String, String> entry : headParams.entrySet()) {
 				headers.add(entry.getKey(), entry.getValue());
 			}
 		}
@@ -92,22 +113,30 @@ public abstract class SiteTaskExtend extends SiteTask {
 
 	/**
 	 * POST 请求
+	 *
 	 * @param url
 	 * @param requestParams
 	 * @return
 	 */
-	protected String postData(String url, Map<String, String> requestParams){
+	protected String postData(String url, Map<String, String> requestParams) {
 		return postData(url, requestParams, null);
 	}
+
+
+	protected String downLoadFile(String targetUri) throws IOException, URISyntaxException {
+		return downLoadFile(targetUri, null);
+	}
+
 	/**
-	 *
 	 * @param targetUri
 	 * @return 文件名
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 */
-	protected String downLoadFile(String targetUri) throws URISyntaxException, IOException {
+	protected String downLoadFile(String targetUri, String fName) throws URISyntaxException, IOException {
 		String fileName = targetUri.substring(targetUri.lastIndexOf("/") + 1);
+		if (!Objects.isNull(fName))
+			fileName = fName;
 //		String targetUri = "http://www.neeq.com.cn/uploads/1/file/public/201802/20180226182405_lc6vjyqntd.pdf";
 		// 小文件
 		RequestEntity requestEntity = RequestEntity.get(new URI(targetUri)).build();
@@ -134,10 +163,11 @@ public abstract class SiteTaskExtend extends SiteTask {
 
 	/**
 	 * 提取原字符串中的中文内容
+	 *
 	 * @param s
 	 * @return
 	 */
-	protected String extracterZH(String s){
+	protected String extracterZH(String s) {
 		String str = s;
 		String reg = "[^\u4e00-\u9fa5]";
 		str = str.replaceAll(reg, "");
@@ -148,29 +178,30 @@ public abstract class SiteTaskExtend extends SiteTask {
 	/**
 	 * 设置过滤字符，
 	 * 用法：
-	 *   List<String> keywords = new ArrayList<String>();
-		 keywords.add("宋体");
-		 keywords.add("黑体");
-		 keywords.add("楷体");
-		 keywords.add("仿宋");
-		 keywords.add("普通表格");
-		 keywords.add("当前位置");
-		 keywords.add("首页");
-		 keywords.add("政务公开");
-		 keywords.add("发布时间");
-		 keywords.add("页脚");
-		 keywords.add("页眉");
-		 keywords.add("页码");
-		 keywords.add("年月日日期版权所有中国银行业监督管理委员会备号访问量次当前页访问量次");
+	 * List<String> keywords = new ArrayList<String>();
+	 * keywords.add("宋体");
+	 * keywords.add("黑体");
+	 * keywords.add("楷体");
+	 * keywords.add("仿宋");
+	 * keywords.add("普通表格");
+	 * keywords.add("当前位置");
+	 * keywords.add("首页");
+	 * keywords.add("政务公开");
+	 * keywords.add("发布时间");
+	 * keywords.add("页脚");
+	 * keywords.add("页眉");
+	 * keywords.add("页码");
+	 * keywords.add("年月日日期版权所有中国银行业监督管理委员会备号访问量次当前页访问量次");
+	 *
 	 * @param src
 	 * @param keywords 需要过滤的字符
 	 * @return
 	 */
-	protected String filter(String src, List<String> keywords){
+	protected String filter(String src, List<String> keywords) {
 		String to = src;
 
 
-		for(String key : keywords){
+		for (String key : keywords) {
 			to = to.replace(key, "");
 		}
 		return to;
@@ -180,12 +211,48 @@ public abstract class SiteTaskExtend extends SiteTask {
 	/**
 	 * 导出为Excel
 	 */
-	protected int exportToXls(String xlsName, List<LinkedHashMap<String, String>> siteObjects){
+	protected int exportToXls(String xlsName, List<LinkedHashMap<String, String>> siteObjects) throws Exception {
 		FileUtil.mkdir(XLS_EXPORT_PATH);
-		return 0;
+		ExportConfig exportConfig = new ExportConfig();
+		exportConfig.setFileName(xlsName);
+
+		List<ExportCell> exportCells = Lists.newArrayList();
+		for (String key : siteObjects.get(0).keySet()) {
+			exportCells.add(new ExportCell(key));
+		}
+
+		exportConfig.setExportCells(exportCells);
+
+		ExportResult exportResult = FileExportor.getExportResult(exportConfig, siteObjects);
+		//输出文件在d盘根目录，系统是win
+//        OutputStream outputStream = new FileOutputStream("d://output.xlsx");
+		//系统mac
+		OutputStream outputStream = new FileOutputStream(XLS_EXPORT_PATH + File.separator + xlsName);
+		exportResult.export(outputStream);
+		return 1;
 	}
 
-	public void exportXls() throws IOException {
+	/**
+	 * 把excel导入，变成map
+	 *
+	 * @throws Exception
+	 */
+	public List<Map<String, Object>> importFromXls(String xlsName, String[] columeNames) throws Exception {
+		File importFile = new File(OCRUtil.DOWNLOAD_DIR + File.separator + xlsName);
+		Configuration configuration = new Configuration();
 
+		configuration.setStartRowNo(1);
+		List<ImportCell> importCells = Lists.newArrayList();
+		for (int i = 0; i < columeNames.length; i++) {
+			importCells.add(new ImportCell(i, columeNames[i]));
+		}
+		configuration.setImportCells(importCells);
+		configuration.setImportFileType(Configuration.ImportFileType.EXCEL);
+
+		MapResult mapResult = (MapResult) FileImportExecutor.importFile(configuration, importFile, importFile.getName());
+		List<Map<String, Object>> maps = mapResult.getResult();
+		FileUtil.del(importFile);
+		return maps;
 	}
+
 }

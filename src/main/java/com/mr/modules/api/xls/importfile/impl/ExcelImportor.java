@@ -122,7 +122,7 @@ public class ExcelImportor extends FileImportor {
                 cell == null ||
                 rawCellType == Cell.CELL_TYPE_STRING && StringUtils.isEmpty(cell.getStringCellValue())) {
             if (nullable == ImportCell.NullAble.NULL_ALLOWED) {
-                maps.put(key, Optional.absent());
+                maps.put(key, null);
             } else {
                 errMsg = String.format("line:%d,column:%d is null,but null is not allowed by setting \n", showLine, showColumn);
                 setErrMsg(errMsg, maps, sb);

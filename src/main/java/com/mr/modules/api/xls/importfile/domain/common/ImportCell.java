@@ -10,6 +10,20 @@ public class ImportCell {
     private CellType cellType;//0:int,1:float,2:string,3:date,4:bigDecimal
     private NullAble nullAble;//是否允许为空 0:允许 ,1:不允许
 
+    public ImportCell(){
+
+    }
+
+    public ImportCell(Integer number, String key, CellType cellType, NullAble nullAble){
+        this.number = number;
+        this.key = key;
+        this.cellType = cellType;
+        this.nullAble = nullAble;
+    }
+
+    public ImportCell(Integer number, String key){
+        this(number, key, CellType.STRING, NullAble.NULL_ALLOWED);
+    }
     public Integer getNumber() {
         return number;
     }

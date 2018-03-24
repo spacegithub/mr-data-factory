@@ -1,9 +1,19 @@
 package com.mr.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.pdfbox.contentstream.PDContentStream;
+import org.apache.pdfbox.contentstream.PdfTimeoutException;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.graphics.state.PDGraphicsState;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jdesktop.swingx.util.OS;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,26 +22,31 @@ import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+
 import com.xiaoleilu.hutool.io.FileUtil;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
 public class OCRUtil {
 
+	AtomicInteger atomicCount = new AtomicInteger();
 	@Value("${download-dir}")
 	private String downloadDir;
 
 	public static String DOWNLOAD_DIR = System.getProperty("java.io.tmpdir");
 
 	@PostConstruct
-	public void postConfig(){
+	public void postConfig() {
 		DOWNLOAD_DIR = downloadDir;
 	}
 
 	/**
 	 * 从img识别文本内容并返回，包含pdf扫描图片识别
+	 *
 	 * @param fileName
 	 * @return
 	 * @throws Exception
@@ -41,32 +56,56 @@ public class OCRUtil {
 	}
 
 	/**
-	 *
+	 * @param filePath
 	 * @Title: getTextFromPdf
 	 * @Description: 读取pdf文件内容
-	 * @param filePath
 	 * @return: 读出的pdf的内容
 	 */
 	public String getTextFromPdf(String filePath) throws Exception {
+
 		String textFile = readPdf(filePath);
-		String res = FileUtil.readString(textFile,  "utf-8");
+		String res = FileUtil.readString(textFile, "utf-8");
 		FileUtil.del(textFile);
 		FileUtil.del(DOWNLOAD_DIR + File.separator + filePath);
 		return res;
 	}
 
 	/**
-	 *
+	 * @param filePath
 	 * @Title: getTextFromDoc
 	 * @Description: 读取doc文本内容
-	 * @param filePath
 	 * @return: 读出的doc的内容
 	 */
 	public String getTextFromDoc(String filePath) throws Exception {
-		// TODO
-		return null;
-	}
+		String entirePath = DOWNLOAD_DIR + File.separator + filePath;
+		InputStream in = new FileInputStream(entirePath);
+		String bodyText = "";
+		try {
+			//转换成  PushbackinputStream
+			if (!in.markSupported()) {
+				in = new PushbackInputStream(in, 8);
+			}
+				//其他word版本
+			if (POIFSFileSystem.hasPOIFSHeader(in)) {
+				HWPFDocument document = new HWPFDocument(in);
+				WordExtractor extractor = new WordExtractor(document);
+				bodyText = extractor.getText();
+			}else{
+				//07 版本
+				XWPFDocument document = new XWPFDocument(in);
+				XWPFWordExtractor extractor = new XWPFWordExtractor(document);
+				bodyText = extractor.getText();
+				System.out.println(bodyText);
+			}
 
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}finally {
+			FileUtil.del(entirePath);
+		}
+
+		return bodyText;
+	}
 
 
 	/**
@@ -86,7 +125,7 @@ public class OCRUtil {
 		//解析image
 		StringBuilder sbs = new StringBuilder();
 		testDataDir.listFiles();
-		for(int i=imgCount - 1; i >= 0; i--){
+		for (int i = imgCount - 1; i >= 0; i--) {
 			sbs.append(recognizeText(files[i]));
 		}
 		//删除文件夹 dirName
@@ -228,10 +267,9 @@ public class OCRUtil {
 
 
 	/**
-	 *
 	 * @param file 原文件名字
-	 * @return	生成的文本文件名字
-	 * @throws  Exception
+	 * @return 生成的文本文件名字
+	 * @throws Exception
 	 */
 	public String readPdf(String file) throws Exception {
 		// 是否排序
@@ -295,7 +333,7 @@ public class OCRUtil {
 
 //			log.info(ocrUtil.recognizeTexts(ocrUtil.image2Dir("P020171222593212170499.pdf")));
 
-			log.info(ocrUtil.getTextFromPdf("P020180302563551437859.pdf"));
+			log.info(ocrUtil.getTextFromPdf("P1521789643025.pdf"));
 
 		} catch (Exception e) {
 			e.printStackTrace();

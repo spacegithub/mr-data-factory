@@ -11,6 +11,7 @@ import com.mr.modules.api.xls.importfile.ConfigurationParserFactory;
 import com.mr.modules.api.xls.importfile.FileImportExecutor;
 import com.mr.modules.api.xls.importfile.domain.MapResult;
 import com.mr.modules.api.xls.importfile.domain.common.Configuration;
+import com.mr.modules.api.xls.importfile.domain.common.ImportCell;
 import com.mr.modules.api.xls.importfile.exception.FileImportException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,8 +36,10 @@ public class XlsTest {
 //		testImport();
 //        URL u = Test.class.getResource("import/config.xml");
 //        System.out.println(u.toString());
-		testExportByNoConfig();
+		testImportConfig();
+//		testImportByNoConfig();
 	}
+
 
 
 	/**
@@ -46,7 +49,7 @@ public class XlsTest {
 	 * @throws FileNotFoundException
 	 * @throws URISyntaxException
 	 */
-	public static void testImport() throws FileImportException, FileNotFoundException, URISyntaxException {
+	public static void testImportConfig() throws FileImportException, FileNotFoundException, URISyntaxException {
 
 		ConfigParser configParser = ConfigurationParserFactory.getConfigParser(Configuration.ParserType.XML);
 		URI uri = XlsTest.class.getResource("import/testImport.xlsx").toURI();
@@ -69,6 +72,45 @@ public class XlsTest {
 			System.out.println(e);
 		}
 	}
+
+	/**
+	 * 把excel导入，变成map
+	 *
+	 * @throws FileImportException
+	 * @throws FileNotFoundException
+	 * @throws URISyntaxException
+	 */
+	public static void testImportByNoConfig() throws FileImportException, FileNotFoundException, URISyntaxException {
+		File importFile = new File("/home/fengjiang/Documents/处罚与处分记录.xlsx");
+		Configuration configuration = new Configuration();
+		try {
+			configuration.setStartRowNo(1);
+			List<ImportCell> importCells = Lists.newArrayList(
+					new ImportCell(0 ,"index"),
+					new ImportCell(1, "float"),
+					new ImportCell(2, "string"),
+					new ImportCell(3, "date"),
+					new ImportCell(4,"bigdecimal")
+			);
+			configuration.setImportCells(importCells);
+			configuration.setImportFileType(Configuration.ImportFileType.EXCEL);
+
+			MapResult mapResult = (MapResult) FileImportExecutor.importFile(configuration, importFile, importFile.getName());
+			List<Map> maps = mapResult.getResult();
+			for (Map<String, Object> map : maps) {
+				Object index = map.get("index");
+				Object f1 = map.get("float");
+				Object string =map.get("string");
+				Object date =  map.get("date");
+				Object bigDecimal = map.get("bigdecimal");
+				System.out.println("index :" + index + " f1 : " + f1 + " string : " + string
+						+ " date : " + date + " bigdecimal : " + bigDecimal.toString());
+			}
+		} catch (FileImportException e) {
+			System.out.println(e);
+		}
+	}
+
 
 	/**
 	 * excel导出，从一个map或者实体类变成excel

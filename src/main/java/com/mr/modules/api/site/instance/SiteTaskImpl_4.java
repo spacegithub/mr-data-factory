@@ -36,6 +36,8 @@ public class SiteTaskImpl_4 extends SiteTaskExtend {
 	 * @throws Throwable
 	 */
 	protected String execute() throws Throwable {
+		log.info("*******************call site4 task**************");
+
 		doSJSData("公开认定");
 		doSJSData("通报批评");
 		doSJSData("公开谴责");
@@ -45,9 +47,8 @@ public class SiteTaskImpl_4 extends SiteTaskExtend {
 	}
 
 	protected String doSJSData(String typeName) throws Throwable {
-		log.info("*******************call site4 task**************");
 
-		//post请球
+		//get请球
 		//1、直接分析表格内容即可
 		//2、提取链接的pdf的文本内容 SiteTaskImpl_4
 
