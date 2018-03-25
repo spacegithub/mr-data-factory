@@ -102,4 +102,59 @@ callId：任务调用ID， 必须全局唯一，由客户端控制
 如：http访问类请使用 RestTemplate 来操作，可以通过SpringUtils.getBean("restTemplate")来获取。  
 2、任务开发涉及到的三部分尽量独立，至少分开三个方法，便于后期维护。  
 3、任务开发过程中只写抓取解析保存逻辑，不要考虑调度安全等问题，这些功能其它部分来考虑。  
-4、错误没有特殊需要直接抛出来，由框架统一处理。   
+4、错误没有特殊需要直接抛出来，由框架统一处理。
+
+## 包说明
+└─src
+    ├─main
+    │  ├─java
+    │  │  └─com
+    │  │      └─mr
+    │  │          ├─common
+    │  │          │  ├─annotation
+    │  │          │  ├─aop
+    │  │          │  ├─base
+    │  │          │  │  ├─controller
+    │  │          │  │  ├─mapper
+    │  │          │  │  ├─model
+    │  │          │  │  └─service
+    │  │          │  │      └─impl
+    │  │          │  ├─exception
+    │  │          │  └─util
+    │  │          ├─config
+    │  │          │  └─cache
+    │  │          └─modules
+    │  │              ├─api
+    │  │              │  ├─caller
+    │  │              │  ├─service
+    │  │              │  │  └─impl
+    │  │              │  ├─site
+    │  │              │  │  └─instance
+    │  │              │  └─xls
+    │  │              │      ├─domain
+    │  │              │      ├─export
+    │  │              │      │  ├─domain
+    │  │              │      │  │  ├─common
+    │  │              │      │  │  └─excel
+    │  │              │      │  ├─exception
+    │  │              │      │  ├─impl
+    │  │              │      │  └─service
+    │  │              │      ├─importfile
+    │  │              │      │  ├─domain
+    │  │              │      │  │  └─common
+    │  │              │      │  ├─exception
+    │  │              │      │  └─impl
+    │  │              │      └─util
+    │  │              └─log
+    │  │                  ├─controller
+    │  │                  ├─mapper
+    │  │                  ├─model
+    │  │                  └─service
+    │  │                      └─impl
+    │  └─resources
+    │      └─generator
+    └─test
+        ├─java
+        └─resources
+            ├─export
+            └─import
