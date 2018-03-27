@@ -1,4 +1,4 @@
-package com.mr.modules.api.site.instance.circsite;
+package com.mr.modules.api.site.instance.boissite;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -20,9 +20,9 @@ import java.util.ArrayList;
  */
 
 @Slf4j
-@Component("circ")
+@Component("bois")
 @Scope("prototype")
-public class SiteTaskImpl_CIRC_List extends SiteTaskExtend {
+public class SiteTaskImpl_BOIS_List extends SiteTaskExtend {
 
 	/**
 	 * @return ""或者null为成功， 其它为失败
@@ -67,7 +67,7 @@ public class SiteTaskImpl_CIRC_List extends SiteTaskExtend {
 
 		//处罚文号
 		String punishNo = "";
-		punishNo = "保监罚〔2018〕10号";    //丛链接中提取
+		punishNo = "保监罚〔2018〕10号";    //丛链接中提取,TODO 部分不再链接中，而是在正文中，这部分需要在正文中获取
 
 
 		boolean isPunishOn = false;
@@ -92,7 +92,7 @@ public class SiteTaskImpl_CIRC_List extends SiteTaskExtend {
 
 		//发布日期
 		String releaseDate = "";
-		releaseDate = "2018-02-23";    //链接中提取
+		releaseDate = "2018-02-23";    //链接中提取 TODO 链接中的日期不全，需要重正文中获取
 
 		//行政处罚详情
 		String punishDetail = "";
